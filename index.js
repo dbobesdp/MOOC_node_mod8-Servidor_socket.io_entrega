@@ -5,6 +5,7 @@ var io = require('socket.io')(http);
 var path = require("path");
 var port = process.env.PORT || 3000;
 
+let counter = 0;
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -22,10 +23,16 @@ io.on('connection', function(socket){
 	});
 
 	socket.on('disconnect', function(msg){
-		io.emit('member_exit', { from, user });
+		counter--;
+		io.emit('member_exit', { from, user, counter});
 	});
 
-	io.emit('new_member', { from, user });
+	socket.on('confetti_thrown', function(msg){
+		io.emit('confetti_received', {from, user})
+	})
+
+	counter++;
+	io.emit('new_member', { from, user, counter });
 });
 
 http.listen(port, function(){
